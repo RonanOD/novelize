@@ -1,5 +1,5 @@
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Inches, Pt
 from docx.enum.text import WD_BREAK
 import os, re, sys
 ###
@@ -19,12 +19,15 @@ import os, re, sys
 docName = ''
 finalDocName = ''
 frontImage = 'images/frontImage.jpg'
-regex = re.compile(r"__\*(.*)\*__")
+imgRegex = re.compile(r"__\*(.*)\*__")
+fontRegex = re.compile(r"_f_(.*)_fS(\d+)_")
+breakRegex = re.compile(r"_p_PAGE_BREAK_p_")
 imageWidth = 6.5
 
 # Start up
 if len(sys.argv) < 2:
     print("Run script with document name as argument: novelize.py my-manuscript.docx")
+    exit()
 else:
     docName = sys.argv[1]
     finalDocName = 'final-' + docName
@@ -43,13 +46,37 @@ run.add_break(WD_BREAK.PAGE)
 # Look for __*imageName*__ in a paragraph on its own 
 # and replace with imageName in same folder:
 for p in document.paragraphs:
-    match = regex.search(p.text)
-    if match:
-        imageFile = "images/" + match.group(1)
+    imgMatch = imgRegex.search(p.text)
+
+    if imgMatch:
+        imageFile = "images/" + imgMatch.group(1)
         for run in p.runs: # delete the text
             run.text = ""
         lastRun = p.add_run()
         lastRun.add_picture(imageFile, width=Inches(imageWidth))
+        continue
+    
+    fontMatch = fontRegex.search(p.text)
+    if fontMatch:
+        # Change the font
+        txt = fontMatch.group(1).strip("_")
+        number = int(fontMatch.group(2))
+        for run in p.runs: # delete the text
+            run.text = ""
+        lastRun = p.add_run()
+        lastRun.font.size = Pt(number)
+        lastRun.text = txt
+        continue
+
+    pbMatch = breakRegex.match(p.text)
+    if pbMatch:
+        # Insert a page break
+        for run in p.runs: # delete the text
+            run.text = ""
+        lastRun = p.add_run()
+        lastRun.add_break(WD_BREAK.PAGE)
+        continue
+        
 
 # Finished. Save the final document
 document.save(finalDocName)

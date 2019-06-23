@@ -22,6 +22,7 @@ frontImage = 'images/frontImage.jpg'
 imgRegex = re.compile(r"__\*(.*)\*__")
 fontRegex = re.compile(r"_f_(.*)_fS(\d+)_")
 breakRegex = re.compile(r"_p_PAGE_BREAK_p_")
+emdashRegex = re.compile(r"(-- )")
 imageWidth = 6.5
 
 # Start up
@@ -47,7 +48,6 @@ run.add_break(WD_BREAK.PAGE)
 # and replace with imageName in same folder:
 for p in document.paragraphs:
     imgMatch = imgRegex.search(p.text)
-
     if imgMatch:
         imageFile = "images/" + imgMatch.group(1)
         for run in p.runs: # delete the text
@@ -76,7 +76,13 @@ for p in document.paragraphs:
         lastRun = p.add_run()
         lastRun.add_break(WD_BREAK.PAGE)
         continue
-        
+
+    emdashMatch = emdashRegex.search(p.text)
+    if emdashMatch:
+        # Replace -- with an emdash
+        p.text = p.text.replace("-- ", "– ")
+        print(p.text)
+        continue
 
 # Finished. Save the final document
 document.save(finalDocName)

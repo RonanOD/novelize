@@ -102,7 +102,7 @@ def backupFile(docName):
         now = now.replace(":", "_")
         now = now.replace(" ", "-")
         newDocName = backupDir + base + str(now) + extension
-        print("XXX " + newDocName)
+        print("Backing up to " + newDocName)
         shutil.copy(docName, newDocName)
 
 def removeText(p):

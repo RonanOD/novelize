@@ -1,7 +1,7 @@
 from docx import Document
 from docx.shared import Inches, Pt
 from docx.enum.text import WD_BREAK
-import os, re, sys
+import os, re, sys, shutil, datetime
 ###
 # Script to add a front image to a novelize document. Front image file must be
 # images/frontImage.jpg.
@@ -14,19 +14,17 @@ import os, re, sys
 # python-docx - https://python-docx.readthedocs.io/en/latest/index.html
 # replacing text - https://www.quora.com/How-can-I-find-and-replace-text-in-a-Word-document-using-Python
 ###
-
-# Variables and Constants
-docName = ''
-finalDocName = ''
-frontImage = 'images/frontImage.jpg'
-imgRegex = re.compile(r"__\*(.*)\*__")
-fontRegex = re.compile(r"_f_(.*)_fS(\d+)_")
-breakRegex = re.compile(r"_p_PAGE_BREAK_p_")
-removeRegex = re.compile(r"__REMOVE__")
-emdashRegex = re.compile(r"(-- )")
-imageWidth = 6.5
-
 def main():
+    # Variables and Constants
+    docName = ''
+    finalDocName = ''
+    frontImage = 'images/frontImage.jpg'
+    imgRegex = re.compile(r"__\*(.*)\*__")
+    fontRegex = re.compile(r"_f_(.*)_fS(\d+)_")
+    breakRegex = re.compile(r"_p_PAGE_BREAK_p_")
+    removeRegex = re.compile(r"__REMOVE__")
+    emdashRegex = re.compile(r"(-- )")
+    imageWidth = 6.5
     # Start up
     if len(sys.argv) < 2:
         print("Run script with document name as argument: novelize.py my-manuscript.docx")
@@ -34,7 +32,7 @@ def main():
     else:
         docName = sys.argv[1]
         finalDocName = 'final-' + docName
-
+    backupFile(docName)
     # Remove final doc if necessary
     if os.path.exists(finalDocName):
         os.remove(finalDocName)
@@ -93,6 +91,19 @@ def main():
 
     # Finished. Save the final document
     document.save(finalDocName)
+
+def backupFile(docName):
+    backupDir = "./backup/"
+    if os.path.exists(docName):
+        if not os.path.exists(backupDir):
+            os.makedirs(backupDir)
+        base, extension = os.path.splitext(docName)
+        now = str(datetime.datetime.now())[:19]
+        now = now.replace(":", "_")
+        now = now.replace(" ", "-")
+        newDocName = backupDir + base + str(now) + extension
+        print("XXX " + newDocName)
+        shutil.copy(docName, newDocName)
 
 def removeText(p):
     for run in p.runs: # delete the text

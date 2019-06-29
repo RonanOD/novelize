@@ -23,7 +23,7 @@ def main():
     fontRegex = re.compile(r"_f_(.*)_fS(\d+)_")
     breakRegex = re.compile(r"_p_PAGE_BREAK_p_")
     removeRegex = re.compile(r"__REMOVE__")
-    emdashRegex = re.compile(r"(-- )")
+    emdashRegex = re.compile(r"(--)")
     imageWidth = 6.5
     # Start up
     if len(sys.argv) < 2:

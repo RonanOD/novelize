@@ -81,6 +81,7 @@ def main():
         if emdashMatch:
             # Replace -- with an emdash
             p.text = p.text.replace("-- ", "—")
+            p.text = p.text.replace("--", "—")
             print(p.text)
             continue
 
